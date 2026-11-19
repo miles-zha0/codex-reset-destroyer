@@ -1,0 +1,9 @@
+name: macOS build
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - run: swiftc Engine.swift Tests.swift -o "$RUNNER_TEMP/tests" && "$RUNNER_TEMP/tests"
+      - run: bash build.sh
