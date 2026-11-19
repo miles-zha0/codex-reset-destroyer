@@ -2,10 +2,10 @@
 <plist version="1.0"><dict>
 <key>CFBundleIdentifier</key><string>local.quotaclock.app</string>
 <key>CFBundleName</key><string>Codex Reset Destroyer</string>
-<key>CFBundleShortVersionString</key><string>1.0.0</string>
+<key>CFBundleShortVersionString</key><string>1.0.1</string>
 <key>LSMinimumSystemVersion</key><string>13.0</string>
 <key>CFBundleExecutable</key><string>QuotaClock</string>
 <key>CFBundlePackageType</key><string>APPL</string>
-<key>CFBundleVersion</key><string>1</string>
+<key>CFBundleVersion</key><string>2</string>
 <key>LSUIElement</key><true/>
 </dict></plist>

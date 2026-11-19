@@ -4,12 +4,12 @@ English · [简体中文](README.zh-CN.md)
 
 **My mission is to destroy the reset.** Not the limit. Not the server. Just that small moment at 4 PM when you realize your five-hour clock never started.
 
-[Download for Mac (.dmg)](https://github.com/miles-god/codex-reset-destroyer/releases/latest/download/Codex-Reset-Destroyer.dmg) · [Release notes & SHA-256](https://github.com/miles-god/codex-reset-destroyer/releases/latest)
+[Download for Mac (.dmg)](https://github.com/miles-zha0/codex-reset-destroyer/releases/latest/download/Codex-Reset-Destroyer.dmg) · [Release notes & SHA-256](https://github.com/miles-zha0/codex-reset-destroyer/releases/latest)
 
 ## From disk image to tiny clock
 
-1. Use macOS 13 or newer, on Intel or Apple Silicon. Install the **Codex desktop app** in `/Applications` or `~/Applications` and sign in with your ChatGPT Plus account. The bundled CLI must support `account/rateLimits/read` and `exec --ignore-user-config`. No API key, Python, or package manager required.
-2. Open the DMG, drag **Codex Reset Destroyer** to Applications, eject the disk image, then open the installed copy. **v1.0.0 is ad-hoc signed, not Apple-notarized.** If macOS blocks it, verify the download against `SHA256SUMS` (`shasum -a 256 Codex-Reset-Destroyer.dmg`). Only if you trust this release, use **System Settings → Privacy & Security → Open Anyway**. A managed Mac may not allow this.
+1. Use macOS 13 or newer, on Apple Silicon (M-series) only. Install the **Codex desktop app** in `/Applications` or `~/Applications` and sign in with your ChatGPT Plus account. The bundled CLI must support `account/rateLimits/read` and `exec --ignore-user-config`. No API key, Python, or package manager required.
+2. Open the DMG, drag **Codex Reset Destroyer** to Applications, eject the disk image, then open the installed copy. **v1.0.1 is ad-hoc signed, not Apple-notarized.** If macOS blocks it, verify the download against `SHA256SUMS` (`shasum -a 256 Codex-Reset-Destroyer.dmg`). Only if you trust this release, use **System Settings → Privacy & Security → Open Anyway**. A managed Mac may not allow this.
 3. Click the little clock → **Settings…**. Pick English, 简体中文, or 日本語, choose your days and hours, and save. English and daily **08:00–18:00** are the defaults. The window opens in the middle of the display you clicked. Login launch is on by default; disable it in Settings.
 
 ## What actually gets destroyed?
@@ -33,6 +33,6 @@ swiftc Engine.swift Tests.swift -o /tmp/reset-tests && /tmp/reset-tests
 bash build.sh
 ```
 
-The universal app, DMG, and checksum land in `dist/`. `Engine.swift` owns eligibility and the CLI protocol; `main.swift` owns the menu, settings, and translations. Bug reports are welcome: include macOS version, CPU, Codex version and expected vs. observed behavior. **Never attach account tokens or your Codex auth file.**
+The Apple Silicon app, DMG, and checksum land in `dist/`. `Engine.swift` owns eligibility and the CLI protocol; `main.swift` owns the menu, settings, and translations. Bug reports are welcome: include macOS version, CPU, Codex version and expected vs. observed behavior. **Never attach account tokens or your Codex auth file.**
 
 MIT licensed. Independent community project; not affiliated with OpenAI.

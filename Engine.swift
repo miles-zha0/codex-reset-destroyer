@@ -48,7 +48,7 @@ private func fetch(_ cli: URL, cwd: URL) throws -> Limits {
             let bytes = output.fileHandleForReading.availableData; if bytes.isEmpty { throw Issue.network }; buffer.append(bytes)
         }
     }
-    try send(["id":1,"method":"initialize","params":["clientInfo":["name":"reset_destroyer","version":"1.0.0"]]]); _ = try reply(1)
+    try send(["id":1,"method":"initialize","params":["clientInfo":["name":"reset_destroyer","version":"1.0.1"]]]); _ = try reply(1)
     try send(["method":"initialized"]); try send(["id":2,"method":"account/rateLimits/read","params":[:]])
     let result = try reply(2)
     guard let data = (result["rateLimitsByLimitId"] as? [String:Any])?["codex"] ?? result["rateLimits"] else { throw Issue.network }

@@ -4,12 +4,12 @@
 
 **我的使命是摧毁重置。** 不是摧毁服务器，也不是打破额度上限。只是想消灭一种尴尬：下午四点准备开工，才发现五小时倒计时还没开始。
 
-[下载 Mac 安装包（DMG）](https://github.com/miles-god/codex-reset-destroyer/releases/latest/download/Codex-Reset-Destroyer.dmg) · [发行说明与 SHA-256 校验文件](https://github.com/miles-god/codex-reset-destroyer/releases/latest)
+[下载 Mac 安装包（DMG）](https://github.com/miles-zha0/codex-reset-destroyer/releases/latest/download/Codex-Reset-Destroyer.dmg) · [发行说明与 SHA-256 校验文件](https://github.com/miles-zha0/codex-reset-destroyer/releases/latest)
 
 ## 安装：从磁盘映像到菜单栏的小钟
 
-1. 需要 macOS 13 或以上，支持 Intel 和 Apple Silicon。先把 Codex 桌面版安装到 `/Applications` 或 `~/Applications`，用 ChatGPT Plus 登录。其自带 CLI 必须支持 `account/rateLimits/read` 和 `exec --ignore-user-config`。不需要 API Key、Python 或 Homebrew。
-2. 打开 DMG，把 **Codex Reset Destroyer** 拖到「应用程序」，推出磁盘映像，再打开已安装的 App。**v1.0.0 只有临时签名，未经 Apple 公证。** 如被系统拦截，先执行 `shasum -a 256 Codex-Reset-Destroyer.dmg`，和 Release 的 `SHA256SUMS` 核对。确认信任后，可在「系统设置 → 隐私与安全性」选择「仍要打开」。受管理的 Mac 可能不允许此操作。
+1. 需要 macOS 13 或以上，仅支持 Apple Silicon（M 系列芯片）。先把 Codex 桌面版安装到 `/Applications` 或 `~/Applications`，用 ChatGPT Plus 登录。其自带 CLI 必须支持 `account/rateLimits/read` 和 `exec --ignore-user-config`。不需要 API Key、Python 或 Homebrew。
+2. 打开 DMG，把 **Codex Reset Destroyer** 拖到「应用程序」，推出磁盘映像，再打开已安装的 App。**v1.0.1 只有临时签名，未经 Apple 公证。** 如被系统拦截，先执行 `shasum -a 256 Codex-Reset-Destroyer.dmg`，和 Release 的 `SHA256SUMS` 核对。确认信任后，可在「系统设置 → 隐私与安全性」选择「仍要打开」。受管理的 Mac 可能不允许此操作。
 3. 点小钟 → **Settings… → Language → 简体中文 → 保存**。默认英文，也支持日文。默认每天 **08:00–18:00**，可改开始、结束时间，或限定周一到周五、周一到周六。窗口在所点屏幕的正中央打开。登录自启默认开启，可在设置中关闭。
 
 ## 它到底做了什么？
@@ -33,6 +33,6 @@ swiftc Engine.swift Tests.swift -o /tmp/reset-tests && /tmp/reset-tests
 bash build.sh
 ```
 
-`dist/` 中是通用 App、DMG 和校验文件。欢迎提 Issue：请附 macOS 版本、芯片、Codex 版本、预期与实际行为，**不要上传令牌或 Codex 登录文件**。
+`dist/` 中是Apple Silicon 专用 App、DMG 和校验文件。欢迎提 Issue：请附 macOS 版本、芯片、Codex 版本、预期与实际行为，**不要上传令牌或 Codex 登录文件**。
 
 MIT 许可证。独立社区项目，与 OpenAI 无隶属关系。
