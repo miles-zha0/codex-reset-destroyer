@@ -77,9 +77,14 @@ final class Clock: NSObject, NSApplicationDelegate {
             },cancel:{ self.window?.close() })
             let panel = NSWindow(contentViewController:NSHostingController(rootView:view)); panel.styleMask = [.titled,.closable]; panel.isReleasedWhenClosed = false; panel.title = name + " · " + lang("Settings","设置","設定"); window = panel
         }
-        guard let panel = window else { return }; panel.contentView?.layoutSubtreeIfNeeded()
-        if let frame = screen?.frame { panel.setFrameOrigin(NSPoint(x:(frame.midX-panel.frame.width/2).rounded(),y:(frame.midY-panel.frame.height/2).rounded())) }
+        guard let panel = window else { return }
+        if let view = panel.contentViewController?.view { view.layoutSubtreeIfNeeded(); panel.setContentSize(view.fittingSize) }
         NSApp.activate(ignoringOtherApps:true); panel.makeKeyAndOrderFront(nil)
+        func centerSettings() {
+            guard let frame = screen?.frame, panel.isVisible else { return }
+            panel.setFrameOrigin(NSPoint(x:(frame.midX-panel.frame.width/2).rounded(),y:(frame.midY-panel.frame.height/2).rounded()))
+        }
+        centerSettings(); DispatchQueue.main.async { centerSettings() }
     }
     @objc func stop() { NSApp.terminate(nil) }
     func alert(_ detail: String) { let panel = NSAlert(); panel.messageText = name; panel.informativeText = detail; NSApp.activate(ignoringOtherApps:true); panel.runModal() }
