@@ -2,7 +2,11 @@
 
 [English](README.md) · 简体中文
 
-**我的使命是摧毁重置。** 不是摧毁服务器，也不是打破额度上限。只是想消灭一种尴尬：下午四点准备开工，才发现五小时倒计时还没开始。
+**5 小时内，用上两轮 Codex 额度？关键是让第一轮早点开始。**
+
+Codex Reset Destroyer 是一个开源 Mac 菜单栏工具。额度满格时，它会在你设定的时段自动轻敲一下 Codex，让倒计时提前跑。等你真正开工，就有机会在接下来的 5 小时里跨过一次重置，用到两轮额度。
+
+**我的使命：摧毁重置。** 不是额度翻倍，是让下一轮早点到。💥
 
 [下载 Mac 安装包（DMG）](https://github.com/miles-zha0/codex-reset-destroyer/releases/latest/download/Codex-Reset-Destroyer.dmg) · [发行说明与 SHA-256 校验文件](https://github.com/miles-zha0/codex-reset-destroyer/releases/latest)
 

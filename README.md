@@ -2,7 +2,11 @@
 
 English · [简体中文](README.zh-CN.md)
 
-**My mission is to destroy the reset.** Not the limit. Not the server. Just that small moment at 4 PM when you realize your five-hour clock never started.
+**Two Codex quota windows in five hours? Start the first one early.**
+
+Codex Reset Destroyer is an open-source Mac menu bar app. During the hours you pick, it sends one tiny ping when your five-hour quota is full. By the time you sit down to work, the clock may already be ticking, so you can hit a reset and tap into the next window within five hours of starting work.
+
+**My mission: destroy the reset.** Not double your quota. Just get to the next window sooner. 💥
 
 [Download for Mac (.dmg)](https://github.com/miles-zha0/codex-reset-destroyer/releases/latest/download/Codex-Reset-Destroyer.dmg) · [Release notes & SHA-256](https://github.com/miles-zha0/codex-reset-destroyer/releases/latest)
 
