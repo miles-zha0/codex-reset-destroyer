@@ -1,4 +1,4 @@
-name: macOS build
+name: Desktop builds
 on: [push, pull_request]
 jobs:
   build:
@@ -7,3 +7,16 @@ jobs:
       - uses: actions/checkout@v4
       - run: swiftc Engine.swift Tests.swift -o "$RUNNER_TEMP/tests" && "$RUNNER_TEMP/tests"
       - run: bash build.sh
+  windows:
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet publish windows/ResetDestroyer.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=None -o dist/win-x64
+      - run: Compress-Archive -Path dist/win-x64/ResetDestroyer.exe -DestinationPath dist/Codex-Reset-Destroyer-Windows-x64.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-x64-release
+          path: dist/Codex-Reset-Destroyer-Windows-x64.zip

@@ -8,7 +8,13 @@ Codex Reset Destroyer is an open-source Mac menu bar app. During the hours you p
 
 **My mission: destroy the reset.** Not double your quota. Just get to the next window sooner. 💥
 
-[Download for Mac (.dmg)](https://github.com/miles-zha0/codex-reset-destroyer/releases/latest/download/Codex-Reset-Destroyer.dmg) · [Release notes & SHA-256](https://github.com/miles-zha0/codex-reset-destroyer/releases/latest)
+[Download for Mac (.dmg)](https://github.com/miles-zha0/codex-reset-destroyer/releases/latest/download/Codex-Reset-Destroyer.dmg) · [Download for Windows x64 (.zip)](https://github.com/miles-zha0/codex-reset-destroyer/releases/latest/download/Codex-Reset-Destroyer-Windows-x64.zip) · [Release notes & checksums](https://github.com/miles-zha0/codex-reset-destroyer/releases/latest)
+
+## Windows tray
+
+On Windows 11 x64, install the Codex CLI and sign in with ChatGPT Plus. Make `codex.exe` available on PATH or set the user environment variable `CODEX_CLI_PATH` to its full path, then restart the tray app. Extract the ZIP to a permanent folder and run `ResetDestroyer.exe`. No separate .NET install is needed. This binary is unsigned; verify the checksum before opening it. Right-click the tray icon (it may be under the overflow arrow) to change the schedule, check usage, or quit. Launch at sign-in defaults to on; turn it off before removing or moving the EXE.
+
+Both apps can continue checking during screen lock if the computer stays awake and online. They do not prevent sleep or run while the computer is asleep. macOS retries after wake and unlock and shows persistent network errors only after a retry.
 
 ## From disk image to tiny clock
 

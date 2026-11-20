@@ -49,6 +49,7 @@ final class Clock: NSObject, NSApplicationDelegate {
     let info = NSMenuItem(), countdown = NSMenuItem(), last = NSMenuItem(), settings = NSMenuItem(), manual = NSMenuItem(), quit = NSMenuItem()
     let agent = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/LaunchAgents/local.quotaclock.login.plist")
     var window: NSWindow?, timer: Timer?, snapshot = Snapshot(), remaining: Int?, failure: Issue?, next = 0.0, busy = false
+    var activity: NSObjectProtocol?, locked = false, announced: Issue?, failures = 0, recheck = false
     var lang: Language { Language(rawValue:prefs.string(forKey:"language") ?? "en") ?? .en }
     func applicationDidFinishLaunching(_ note: Notification) {
         prefs.register(defaults:["days":7,"start":480,"end":1080]); let menu = NSMenu()
@@ -56,7 +57,17 @@ final class Clock: NSObject, NSApplicationDelegate {
         for row in [info,countdown,last,NSMenuItem.separator(),settings,manual,quit] { menu.addItem(row) }
         for (row,action) in [(settings,#selector(show)),(manual,#selector(check)),(quit,#selector(stop))] { row.target = self; row.action = action }
         if !prefs.bool(forKey:"configured") || FileManager.default.fileExists(atPath:agent.path) { do { try configure(true) } catch { alert(error.localizedDescription) } }
+        activity = ProcessInfo.processInfo.beginActivity(options:.userInitiatedAllowingIdleSystemSleep, reason:"Keep Codex quota checks running while the display is locked")
+        let screenEvents = DistributedNotificationCenter.default()
+        screenEvents.addObserver(self, selector:#selector(didLock), name:Notification.Name("com.apple.screenIsLocked"), object:nil)
+        screenEvents.addObserver(self, selector:#selector(didUnlock), name:Notification.Name("com.apple.screenIsUnlocked"), object:nil)
+        NSWorkspace.shared.notificationCenter.addObserver(self, selector:#selector(didWake), name:NSWorkspace.didWakeNotification, object:nil)
         tick(); timer = Timer.scheduledTimer(withTimeInterval:2,repeats:true) { _ in self.tick() }
+    }
+    @objc func didLock(_ note: Notification) { locked = true }
+    @objc func didUnlock(_ note: Notification) { locked = false; didWake(note) }
+    @objc func didWake(_ note: Notification) {
+        if busy { recheck = true } else { next = Date().timeIntervalSince1970+2 }
     }
     func configure(_ enabled: Bool) throws {
         if enabled {
@@ -104,9 +115,18 @@ final class Clock: NSObject, NSApplicationDelegate {
             let result = Result { try checkLimits(schedule) }; DispatchQueue.main.async {
                 let now = Date().timeIntervalSince1970; self.next = now+60
                 switch result {
-                case .success(let (remaining,state)): self.remaining = remaining; self.snapshot = state; self.failure = nil; if state.hold > now { self.next = min(now+300,state.hold+2) }
-                case .failure(let error): let issue = error as? Issue ?? .network; let changed = self.failure != issue; self.failure = issue; if changed { self.alert(self.lang.message(issue)) }
-                }; self.busy = false; self.tick()
+                case .success(let (remaining,state)): self.remaining = remaining; self.snapshot = state; self.failure = nil; self.announced = nil; self.failures = 0; if state.hold > now { self.next = min(now+300,state.hold+2) }
+                case .failure(let error):
+                    let issue = error as? Issue ?? .network
+                    self.failures = self.failure == issue ? self.failures + 1 : 1
+                    self.failure = issue
+                    if issue == .network { self.next = now + (self.failures == 1 ? 10 : 60) }
+                    if !self.locked && self.announced != issue && (issue != .network || self.failures >= 2) {
+                        self.announced = issue; self.alert(self.lang.message(issue))
+                    }
+                }
+                if self.recheck { self.next = now+2; self.recheck = false }
+                self.busy = false; self.tick()
             }
         }
     }

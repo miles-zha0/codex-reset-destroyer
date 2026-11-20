@@ -8,7 +8,13 @@ Codex Reset Destroyer 是一个开源 Mac 菜单栏工具。额度满格时，�
 
 **我的使命：摧毁重置。** 不是额度翻倍，是让下一轮早点到。💥
 
-[下载 Mac 安装包（DMG）](https://github.com/miles-zha0/codex-reset-destroyer/releases/latest/download/Codex-Reset-Destroyer.dmg) · [发行说明与 SHA-256 校验文件](https://github.com/miles-zha0/codex-reset-destroyer/releases/latest)
+[下载 Mac 安装包（DMG）](https://github.com/miles-zha0/codex-reset-destroyer/releases/latest/download/Codex-Reset-Destroyer.dmg) · [下载 Windows x64 托盘版（ZIP）](https://github.com/miles-zha0/codex-reset-destroyer/releases/latest/download/Codex-Reset-Destroyer-Windows-x64.zip) · [发行说明与校验文件](https://github.com/miles-zha0/codex-reset-destroyer/releases/latest)
+
+## Windows 托盘版
+
+Windows 11 x64 用户先安装 Codex CLI，用 ChatGPT Plus 登录。确保 PATH 能找到 `codex.exe`，或把用户环境变量 `CODEX_CLI_PATH` 设成其完整路径，再重启托盘程序。将 ZIP 解压到固定位置，运行 `ResetDestroyer.exe`；不需要另外安装 .NET。EXE 未签名，打开前请核对校验值。右键托盘图标（可能藏在折叠区）即可设定运行时段、立即检查或退出。默认登录自启，移动或删除 EXE 前可以先在设置里关闭。
+
+只要电脑没休眠、网络在线，锁屏时也能继续运行。两个版本都不会阻止系统休眠，也不能在休眠中发请求。Mac 在唤醒或解锁后会尽快重新检查，网络故障重试后仍存在才会弹窗。
 
 ## 安装：从磁盘映像到菜单栏的小钟
 

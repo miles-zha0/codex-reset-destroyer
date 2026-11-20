@@ -35,7 +35,7 @@ private func fetch(_ cli: URL, cwd: URL) throws -> Limits {
     let proc = child(cli, ["app-server"], cwd:cwd), input = Pipe(), output = Pipe()
     proc.standardInput = input; proc.standardOutput = output; try proc.run()
     let timeout = deadline(proc, seconds:35)
-    defer { timeout.cancel(); if proc.isRunning { proc.terminate() }; try? input.fileHandleForWriting.close(); proc.waitUntilExit() }
+    defer { try? input.fileHandleForWriting.close(); if proc.isRunning { kill(proc.processIdentifier, SIGKILL) }; proc.waitUntilExit(); timeout.cancel() }
     var buffer = Data()
     func send(_ obj: [String:Any]) throws { var data = try JSONSerialization.data(withJSONObject:obj); data.append(10); try input.fileHandleForWriting.write(contentsOf:data) }
     func reply(_ id: Int) throws -> [String:Any] {
