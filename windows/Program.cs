@@ -38,7 +38,6 @@ sealed class Tray : ApplicationContext
     Settings settings = new();
     DateTimeOffset next;
     bool busy;
-    string? lastError;
     Form? form;
 
     public Tray()
@@ -95,9 +94,6 @@ sealed class Tray : ApplicationContext
     void Report(string message)
     {
         status.Text = message;
-        if (message == lastError) return;
-        lastError = message;
-        icon.ShowBalloonTip(5000, AppName, message, ToolTipIcon.Warning);
     }
 
     void ShowSettings()
@@ -113,15 +109,17 @@ sealed class Tray : ApplicationContext
         var end = Time(settings.End);
         var login = new CheckBox { Text = "Launch at sign-in", Checked = settings.Login, AutoSize = true };
         var save = new Button { Text = "Save", AutoSize = true };
+        var validation = new Label { AutoSize = true, Visible = false, MaximumSize = new Size(280, 0) };
         foreach (var control in new Control[] { new Label { Text = "Repeat", AutoSize = true }, days, new Label { Text = "Start (local time)", AutoSize = true }, start, new Label { Text = "End (local time)", AutoSize = true }, end, login, save })
             layout.Controls.Add(control);
+        layout.Controls.Add(validation);
         save.Click += (_, _) =>
         {
             int from = (int)start.Value.TimeOfDay.TotalMinutes, until = (int)end.Value.TimeOfDay.TotalMinutes;
-            if (from >= until) { MessageBox.Show(form, "End must be later than start.", AppName); return; }
+            if (from >= until) { validation.Text = "End must be later than start."; validation.Visible = true; return; }
             var updated = new Settings(new[] { 7, 5, 6 }[days.SelectedIndex], from, until, login.Checked);
             try { SaveStartup(updated.Login); Store("settings.json", updated); settings = updated; form.Close(); next = default; }
-            catch (Exception error) { Report(error.Message); }
+            catch (Exception error) { validation.Text = error.Message; validation.Visible = true; }
         };
         form.Controls.Add(layout);
         form.AcceptButton = save;
@@ -141,7 +139,6 @@ sealed class Tray : ApplicationContext
         try
         {
             var (remaining, hold) = await Task.Run(() => RunCheck(schedule, shutdown.Token));
-            lastError = null;
             var reset = DateTimeOffset.FromUnixTimeSeconds(hold).ToLocalTime();
             status.Text = reset > DateTimeOffset.Now ? $"Five-hour quota: {remaining}% left · resets {reset:g}" : $"Five-hour quota: {remaining}% left";
             if (reset > DateTimeOffset.Now)
@@ -151,7 +148,11 @@ sealed class Tray : ApplicationContext
             }
         }
         catch (OperationCanceledException) when (shutdown.IsCancellationRequested) { }
-        catch (Exception error) { if (!shutdown.IsCancellationRequested) Report(error.Message); }
+        catch (Exception error)
+        {
+            next = DateTimeOffset.Now.AddMinutes(1);
+            if (!shutdown.IsCancellationRequested) Report(error.Message);
+        }
         finally { busy = false; }
     }
 

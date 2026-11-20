@@ -14,7 +14,7 @@ Codex Reset Destroyer is an open-source Mac menu bar app. During the hours you p
 
 On Windows 11 x64, install the Codex CLI and sign in with ChatGPT Plus. Make `codex.exe` available on PATH or set the user environment variable `CODEX_CLI_PATH` to its full path, then restart the tray app. Extract the ZIP to a permanent folder and run `ResetDestroyer.exe`. No separate .NET install is needed. This binary is unsigned; verify the checksum before opening it. Right-click the tray icon (it may be under the overflow arrow) to change the schedule, check usage, or quit. Launch at sign-in defaults to on; turn it off before removing or moving the EXE.
 
-Both apps can continue checking during screen lock if the computer stays awake and online. They do not prevent sleep or run while the computer is asleep. macOS retries after wake and unlock and shows persistent network errors only after a retry.
+Both apps keep checking while the computer is locked and awake. They do not prevent sleep. After a connection failure, they retry silently and resume when the network is back. macOS also rechecks after wake or unlock.
 
 ## From disk image to tiny clock
 
@@ -31,7 +31,7 @@ Before sending, the app writes a local timestamp and a five-hour hold. Even if t
 ## Privacy & troubleshooting
 
 - No project files in the ping: it runs in a fresh temporary folder. No app telemetry, custom backend, or account-token storage. The Codex CLI handles authentication and contacts OpenAI. Enabled macOS HTTP/HTTPS proxies are passed to the CLI; PAC-only configurations are not explicitly resolved.
-- The icon stays still. Click it for the remaining quota and countdown. Failures raise an alert; an unchanged failure is not announced on every poll. If usage cannot be read, check Codex sign-in, CLI compatibility and VPN before retrying.
+- The icon stays still. Open the menu to see remaining quota, the reset timer, or an error. No error pop-ups. If usage does not return, check Codex sign-in, CLI compatibility and VPN.
 - To uninstall, disable launch at login, quit, and move the app to Trash. Optional local state: `~/Library/Application Support/QuotaClock/state.json`; preferences: `local.quotaclock.app`. These legacy names preserve old settings. Don’t delete state to retry a ping: it also remembers duplicate prevention.
 
 ## Build & contribute

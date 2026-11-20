@@ -49,23 +49,20 @@ final class Clock: NSObject, NSApplicationDelegate {
     let info = NSMenuItem(), countdown = NSMenuItem(), last = NSMenuItem(), settings = NSMenuItem(), manual = NSMenuItem(), quit = NSMenuItem()
     let agent = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/LaunchAgents/local.quotaclock.login.plist")
     var window: NSWindow?, timer: Timer?, snapshot = Snapshot(), remaining: Int?, failure: Issue?, next = 0.0, busy = false
-    var activity: NSObjectProtocol?, locked = false, announced: Issue?, failures = 0, recheck = false
+    var activity: NSObjectProtocol?, settingsError: String?, recheck = false
     var lang: Language { Language(rawValue:prefs.string(forKey:"language") ?? "en") ?? .en }
     func applicationDidFinishLaunching(_ note: Notification) {
         prefs.register(defaults:["days":7,"start":480,"end":1080]); let menu = NSMenu()
         bar.button?.image = NSImage(systemSymbolName:"clock",accessibilityDescription:name); bar.menu = menu
         for row in [info,countdown,last,NSMenuItem.separator(),settings,manual,quit] { menu.addItem(row) }
         for (row,action) in [(settings,#selector(show)),(manual,#selector(check)),(quit,#selector(stop))] { row.target = self; row.action = action }
-        if !prefs.bool(forKey:"configured") || FileManager.default.fileExists(atPath:agent.path) { do { try configure(true) } catch { alert(error.localizedDescription) } }
+        if !prefs.bool(forKey:"configured") || FileManager.default.fileExists(atPath:agent.path) { do { try configure(true) } catch { settingsError = error.localizedDescription } }
         activity = ProcessInfo.processInfo.beginActivity(options:.userInitiatedAllowingIdleSystemSleep, reason:"Keep Codex quota checks running while the display is locked")
         let screenEvents = DistributedNotificationCenter.default()
-        screenEvents.addObserver(self, selector:#selector(didLock), name:Notification.Name("com.apple.screenIsLocked"), object:nil)
-        screenEvents.addObserver(self, selector:#selector(didUnlock), name:Notification.Name("com.apple.screenIsUnlocked"), object:nil)
+        screenEvents.addObserver(self, selector:#selector(didWake), name:Notification.Name("com.apple.screenIsUnlocked"), object:nil)
         NSWorkspace.shared.notificationCenter.addObserver(self, selector:#selector(didWake), name:NSWorkspace.didWakeNotification, object:nil)
         tick(); timer = Timer.scheduledTimer(withTimeInterval:2,repeats:true) { _ in self.tick() }
     }
-    @objc func didLock(_ note: Notification) { locked = true }
-    @objc func didUnlock(_ note: Notification) { locked = false; didWake(note) }
     @objc func didWake(_ note: Notification) {
         if busy { recheck = true } else { next = Date().timeIntervalSince1970+2 }
     }
@@ -83,7 +80,8 @@ final class Clock: NSObject, NSApplicationDelegate {
             func time(_ key: String) -> Date { let value = prefs.integer(forKey:key); return Calendar.current.date(bySettingHour:value/60,minute:value%60,second:0,of:Date()) ?? Date() }
             let login = FileManager.default.fileExists(atPath:agent.path)
             let view = SettingsView(lang:lang,days:prefs.integer(forKey:"days"),start:time("start"),end:time("end"),login:login,save:{ language,days,start,end,enabled in
-                do { if enabled != login { try self.configure(enabled) } } catch { self.alert(error.localizedDescription); return }
+                do { if enabled != login || self.settingsError != nil { try self.configure(enabled) }; self.settingsError = nil }
+                catch { self.settingsError = error.localizedDescription; self.window?.close(); self.tick(); return }
                 self.prefs.set(language.rawValue,forKey:"language"); self.prefs.set(days,forKey:"days"); self.prefs.set(start,forKey:"start"); self.prefs.set(end,forKey:"end"); self.window?.close(); self.next = 0; self.tick()
             },cancel:{ self.window?.close() })
             let panel = NSWindow(contentViewController:NSHostingController(rootView:view)); panel.styleMask = [.titled,.closable]; panel.isReleasedWhenClosed = false; panel.title = name + " · " + lang("Settings","设置","設定"); window = panel
@@ -98,11 +96,10 @@ final class Clock: NSObject, NSApplicationDelegate {
         centerSettings(); DispatchQueue.main.async { centerSettings() }
     }
     @objc func stop() { NSApp.terminate(nil) }
-    func alert(_ detail: String) { let panel = NSAlert(); panel.messageText = name; panel.informativeText = detail; NSApp.activate(ignoringOtherApps:true); panel.runModal() }
     func tick() {
         let now = Date().timeIntervalSince1970, text = lang
         settings.title = text("Settings…","设置…","設定…"); manual.title = text("Check now","立即检查","今すぐ確認"); quit.title = text("Quit","退出","終了")
-        info.title = failure.map(text.message) ?? remaining.map { text("Five-hour quota: \($0)% left","五小时额度剩余 \($0)%","5 時間枠の残り：\($0)%") } ?? text("Checking usage…","正在读取额度…","使用量を確認中…")
+        info.title = failure.map(text.message) ?? settingsError ?? remaining.map { text("Five-hour quota: \($0)% left","五小时额度剩余 \($0)%","5 時間枠の残り：\($0)%") } ?? text("Checking usage…","正在读取额度…","使用量を確認中…")
         let mins = max(0,Int(ceil((snapshot.hold-now)/60))); countdown.isHidden = mins == 0 || failure != nil
         countdown.title = text("Resets in ","距离重置：","リセットまで：") + String(format:"%d:%02d",mins/60,mins%60)
         if let sent = snapshot.last { let fmt = DateFormatter(); fmt.locale = Locale(identifier:text.rawValue); fmt.dateStyle = .short; fmt.timeStyle = .short; last.title = text("Last attempt: ","上次尝试：","前回の試行：") + fmt.string(from:Date(timeIntervalSince1970:sent)) } else { last.title = text("No ping sent yet","尚未发送请求","まだ送信していません") }
@@ -115,15 +112,11 @@ final class Clock: NSObject, NSApplicationDelegate {
             let result = Result { try checkLimits(schedule) }; DispatchQueue.main.async {
                 let now = Date().timeIntervalSince1970; self.next = now+60
                 switch result {
-                case .success(let (remaining,state)): self.remaining = remaining; self.snapshot = state; self.failure = nil; self.announced = nil; self.failures = 0; if state.hold > now { self.next = min(now+300,state.hold+2) }
+                case .success(let (remaining,state)): self.remaining = remaining; self.snapshot = state; self.failure = nil; if state.hold > now { self.next = min(now+300,state.hold+2) }
                 case .failure(let error):
                     let issue = error as? Issue ?? .network
-                    self.failures = self.failure == issue ? self.failures + 1 : 1
+                    if issue == .network && self.failure != .network { self.next = now + 10 }
                     self.failure = issue
-                    if issue == .network { self.next = now + (self.failures == 1 ? 10 : 60) }
-                    if !self.locked && self.announced != issue && (issue != .network || self.failures >= 2) {
-                        self.announced = issue; self.alert(self.lang.message(issue))
-                    }
                 }
                 if self.recheck { self.next = now+2; self.recheck = false }
                 self.busy = false; self.tick()
@@ -131,6 +124,7 @@ final class Clock: NSObject, NSApplicationDelegate {
         }
     }
 }
+signal(SIGPIPE, SIG_IGN)
 if CommandLine.arguments.contains("--read-only-check") {
     do { let (remaining,_) = try checkLimits(Schedule(days:7,start:480,end:1080),readOnly:true); print("Remaining: \(remaining)%"); exit(0) } catch { print("Check failed: \(error)"); exit(1) }
 }
